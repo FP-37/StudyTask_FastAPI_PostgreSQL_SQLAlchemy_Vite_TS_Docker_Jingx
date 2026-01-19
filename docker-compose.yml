@@ -1,0 +1,82 @@
+services:
+  postgres_auth:
+    image: postgres:16
+    container_name: postgres_auth
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_pass
+    ports:
+      - "5433:5432"
+    volumes:
+      - pg_auth_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  postgres_buslines:
+    image: postgres:16
+    container_name: postgres_buslines
+    environment:
+      POSTGRES_DB: buslines_db
+      POSTGRES_USER: bus_user
+      POSTGRES_PASSWORD: bus_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - pg_buslines_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U bus_user -d buslines_db"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+  auth_service:
+    build:
+      context: .
+      dockerfile: auth_service/Dockerfile
+    container_name: auth_service
+    environment:
+      JWT_SECRET_KEY: super_secret_key_for_exam
+      DATABASE_URL: postgresql+psycopg2://auth_user:auth_pass@postgres_auth:5432/auth_db
+    depends_on:
+      postgres_auth:
+        condition: service_healthy
+    ports:
+      - "8001:8001"
+    restart: on-failure
+
+  buslines_service:
+    build:
+      context: .
+      dockerfile: buslines_service/Dockerfile
+    container_name: buslines_service
+    environment:
+      JWT_SECRET_KEY: super_secret_key_for_exam
+      DATABASE_URL: postgresql+psycopg2://bus_user:bus_pass@postgres_buslines:5432/buslines_db
+    depends_on:
+      postgres_buslines:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    restart: on-failure
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_AUTH_URL: "http://127.0.0.1:8001"
+        VITE_BUSLINES_URL: "http://127.0.0.1:8000"
+    container_name: frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - auth_service
+      - buslines_service
+
+volumes:
+  pg_auth_data:
+  pg_buslines_data:
