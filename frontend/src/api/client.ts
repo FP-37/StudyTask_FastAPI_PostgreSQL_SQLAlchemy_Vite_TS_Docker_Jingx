@@ -3,7 +3,7 @@ import axios, { AxiosError } from "axios";
 const TOKEN_KEY = "access_token";
 
 const BUSLINES_BASE =
-  import.meta.env.VITE_BUSLINES_URL ?? "http://127.0.0.1:8000";
+  import.meta.env.VITE_BUSLINES_URL ?? "http://127.0.0.1:8002";
 const AUTH_BASE =
   import.meta.env.VITE_AUTH_URL ?? "http://127.0.0.1:8001";
 

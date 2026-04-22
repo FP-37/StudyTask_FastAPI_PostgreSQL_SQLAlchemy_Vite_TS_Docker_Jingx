@@ -1,0 +1,6 @@
+kafka-python==2.0.6
+SQLAlchemy==2.0.45
+psycopg2-binary>=2.9
+confluent-kafka==2.4.0
+fastavro==1.9.4
+requests==2.31.0

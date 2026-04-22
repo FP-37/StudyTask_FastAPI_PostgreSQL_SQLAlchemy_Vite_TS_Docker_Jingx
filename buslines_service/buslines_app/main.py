@@ -4,11 +4,15 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from buslines_app.db.init_db import init_db
 from buslines_app.api.bus_lines import router as bus_lines_router
+from buslines_app.kafka.outbox_relay import start_relay
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    start_relay()
     yield
+
 
 app = FastAPI(title="BusLines Service", version="0.1.0", lifespan=lifespan)
 
@@ -21,6 +25,7 @@ app.add_middleware(
 )
 
 app.include_router(bus_lines_router)
+
 
 @app.get("/health")
 def health():

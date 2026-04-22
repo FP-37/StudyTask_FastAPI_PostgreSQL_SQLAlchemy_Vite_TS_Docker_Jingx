@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 
 import { createBusLine, getBusLine, updateBusLine } from "../api/busLines";
+import { getApiErrorMessage } from "../api/client";
 
 type Props = { mode: "create" } | { mode: "edit" };
 
@@ -166,8 +167,8 @@ export default function BusLineFormPage(props: Props) {
       }
 
       navigate("/bus-lines");
-    } catch {
-      setError("Сохранение не удалось.");
+    } catch (e) {
+      setError(getApiErrorMessage(e, "Сохранение не удалось."));
     } finally {
       setSaving(false);
     }
