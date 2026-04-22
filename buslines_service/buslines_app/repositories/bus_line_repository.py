@@ -6,15 +6,12 @@ from buslines_app.schemas.bus_line import LineCreate, LineUpdate
 
 
 class BusLineRepository:
-    """Слой доступа к данным (SQLAlchemy)."""
-
     def __init__(self, db: Session):
         self.db = db
 
     def create(self, payload: LineCreate, owner_id: int) -> BusLine:
         data = payload.model_dump()
         line = BusLine(**data, owner_id=owner_id)
-
         self.db.add(line)
         self.db.commit()
         self.db.refresh(line)
@@ -29,12 +26,9 @@ class BusLineRepository:
 
     def update(self, line: BusLine, payload: LineUpdate) -> BusLine:
         data = payload.model_dump(exclude_unset=True)
-
         data.pop("owner_id", None)
-
         for key, value in data.items():
             setattr(line, key, value)
-
         self.db.commit()
         self.db.refresh(line)
         return line
